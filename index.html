@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+<title>BCD Clock</title>
+<style type="text/css">
+body {
+  width: 100%;
+  height: 100%;
+  margin: 0px 0px 0px 0px;
+  background-color: black;
+}
+
+#container {
+  position: absolute;
+  top: 0px;
+  left: 0px;
+  height: 100%;
+  width: 100%;
+}
+</style>
+</head>
+
+<!-- <script src="webOSTVjs-1.2.4/webOSTV.js" charset="utf-8"></script> -->
+<!-- <script src="webOSTVjs-1.2.4/webOSTV-dev.js" charset="utf-8"></script> -->
+
+<body>
+<div id="container"></div>
+</body>
+
+<script type="text/javascript">
+const timeOnColor = "#bfff00"; // lime
+const dateOnColor = "#5f7f00"; // darkened lime
+const offColor = "#123524"; // phthalo green
+
+function onStart() {
+  var container = document.getElementById("container");
+  container.replaceChildren(); // ensure empty container
+
+  var square = Math.min(container.clientWidth, container.clientHeight);
+  var originX = container.clientWidth / 2;
+  var originY = container.clientHeight / 2;
+
+  function create4Leds(basename, left, top, width, height) {
+    var leds = [null, null, null, null];
+    for (var i = 0; i < 4; i++) {
+      var led = document.createElement("div");
+      led.id = `${basename}-${1 << i}`;
+      led.class = "led";
+      led.style.position = "absolute";
+      led.style.left = `${left + width * 0.05}px`;
+      led.style.top = `${top - i * height + height * 0.05}px`;
+      led.style.width = `${width * 0.9}px`;
+      led.style.height = `${height * 0.9}px`;
+      leds[i] = led;
+
+      container.appendChild(led);
+    }
+    return leds;
+  }
+
+  var hourLeds = [
+    create4Leds("h1", originX - square * 36 / 120, originY - square * 2 / 120, square * 12 / 120, square * 12 / 120),
+    create4Leds("h10", originX - square * 48 / 120, originY - square * 2 / 120, square * 12 / 120, square * 12 / 120),
+  ];
+
+  var minuteLeds = [
+    create4Leds("m1", originX - square * 0 / 120, originY - square * 2 / 120, square * 12 / 120, square * 12 / 120),
+    create4Leds("m10", originX - square * 12 / 120, originY - square * 2 / 120, square * 12 / 120, square * 12 / 120),
+  ];
+
+  var secondLeds = [
+    create4Leds("s1", originX + square * 36 / 120, originY - square * 2 / 120, square * 12 / 120, square * 12 / 120),
+    create4Leds("s10", originX + square * 24 / 120, originY - square * 2 / 120, square * 12 / 120, square * 12 / 120),
+  ];
+
+  var yearLeds = [
+    create4Leds("Y1", originX - square * 12 / 120, originY + square * 34 / 120, square * 6 / 120, square * 4 / 120),
+    create4Leds("Y10", originX - square * 18 / 120, originY + square * 34 / 120, square * 6 / 120, square * 4 / 120),
+    create4Leds("Y100", originX - square * 24 / 120, originY + square * 34 / 120, square * 6 / 120, square * 4 / 120),
+    create4Leds("Y1000", originX - square * 30 / 120, originY + square * 34 / 120, square * 6 / 120, square * 4 / 120),
+  ];
+
+  var monthLeds = [
+    create4Leds("M1", originX + square * 6 / 120, originY + square * 34 / 120, square * 6 / 120, square * 4 / 120),
+    create4Leds("M10", originX + square * 0 / 120, originY + square * 34 / 120, square * 6 / 120, square * 4 / 120),
+  ];
+
+  var dayLeds = [
+    create4Leds("D1", originX + square * 24 / 120, originY + square * 34 / 120, square * 6 / 120, square * 4 / 120),
+    create4Leds("D10", originX + square * 18 / 120, originY + square * 34 / 120, square * 6 / 120, square * 4 / 120),
+  ];
+
+  // Update the leds with the current time
+  function updateLeds(value, leds, onColor) {
+    for (var digitLeds of leds) {
+      var digit = value % 10;
+      value = Math.floor(value / 10);
+      for (var led of digitLeds) {
+        var state = digit % 2;
+        digit = Math.floor(digit / 2);
+        if (state == 0) {
+          led.style.backgroundColor = offColor;
+        }
+        else {
+          led.style.backgroundColor = onColor;
+        }
+      }
+    }
+  }
+
+  var lastHour = null;
+  var lastMinute = null;
+  var lastSecond = null;
+  var lastYear = null;
+  var lastMonth = null;
+  var lastDay = null;
+
+  function updateClock() {
+    var today = new Date();
+
+    var hour = today.getHours();
+    var mins = today.getMinutes();
+    var secs = today.getSeconds();
+    var years = today.getFullYear();
+    var months = today.getMonth() + 1;
+    var days = today.getDate();
+
+    if (lastHour !== hour) {
+      lastHour = hour;
+      updateLeds(hour, hourLeds, timeOnColor);
+    }
+    if (lastMinute !== mins) {
+      lastMinute = mins;
+      updateLeds(mins, minuteLeds, timeOnColor);
+    }
+    if (lastSecond !== secs) {
+      lastSecond = secs;
+      updateLeds(secs, secondLeds, timeOnColor);
+    }
+
+    if (lastYear !== years) {
+      lastYear = years;
+      updateLeds(years, yearLeds, dateOnColor);
+    }
+    if (lastMonth !== months) {
+      lastMonth = months;
+      updateLeds(months, monthLeds, dateOnColor);
+    }
+    if (lastDay !== days) {
+      lastDay = days;
+      updateLeds(days, dayLeds, dateOnColor);
+    }
+  }
+
+  // Update the clock every second
+  setInterval(updateClock, 1000);
+
+  // Don't start with a blank screen
+  updateClock();
+}
+
+document.addEventListener('webOSLaunch', onStart, true);
+</script>
+
+</html>

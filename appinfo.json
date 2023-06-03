@@ -1,0 +1,12 @@
+{
+  "title": "BCD Clock",
+  "appDescription": "There are only 10 types of people in the world ...",
+  "vendor": "Akos Kiss",
+  "id": "io.github.akosthekiss.bcdclock-webostv",
+  "version": "1.0.0",
+  "type": "web",
+  "main": "index.html",
+  "icon": "icon-80x80.png",
+  "largeIcon": "icon-130x130.png",
+  "splashBackground": "splash-1920x1080.png"
+}
